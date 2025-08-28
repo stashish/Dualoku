@@ -7,19 +7,35 @@ const NumberPadContainer = styled.div`
   align-items: center;
   gap: 15px;
   margin-top: 20px;
+  
+  @media (max-width: 768px) {
+    margin-top: 15px;
+    gap: 12px;
+  }
 `;
 
 const NumberPadTitle = styled.h3`
   color: #2c3e50;
   font-size: 1.1rem;
   margin: 0;
+  text-align: center;
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const NumberGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(${props => Math.ceil(Math.sqrt(props.maxNumber))}, 1fr);
   gap: 8px;
-  max-width: 200px;
+  max-width: 250px;
+  width: 100%;
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+    max-width: 220px;
+  }
 `;
 
 const NumberButton = styled.button`
@@ -34,6 +50,10 @@ const NumberButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   
+  /* Better touch targets for mobile */
+  min-height: 44px;
+  min-width: 44px;
+  
   &:hover {
     background: #3498db;
     color: white;
@@ -42,6 +62,18 @@ const NumberButton = styled.button`
   
   &:active {
     transform: scale(0.95);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
   }
 `;
 

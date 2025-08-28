@@ -8,20 +8,30 @@ import './App.css';
 
 const AppContainer = styled.div`
   min-height: 100vh;
+  min-height: 100dvh; /* Use dynamic viewport height for mobile */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    min-height: 100vh;
+  }
 `;
 
 const Title = styled.h1`
   color: white;
-  font-size: 3rem;
-  margin-bottom: 30px;
+  font-size: clamp(2rem, 8vw, 3rem);
+  margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   text-align: center;
+  
+  @media (max-width: 480px) {
+    margin-bottom: 15px;
+  }
 `;
 
 const GameContainer = styled.div`
@@ -32,6 +42,16 @@ const GameContainer = styled.div`
   backdrop-filter: blur(10px);
   max-width: 600px;
   width: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+    margin: 0 10px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+    border-radius: 15px;
+  }
 `;
 
 const ControlsContainer = styled.div`
@@ -40,6 +60,11 @@ const ControlsContainer = styled.div`
   gap: 20px;
   margin-bottom: 30px;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    gap: 15px;
+    margin-bottom: 20px;
+  }
 `;
 
 function App() {
@@ -93,17 +118,17 @@ function App() {
         [5, 0, 0, 0, 6, 4]
       ];
     } else {
-      // Simple 9x9 test puzzle
+      // Very simple 9x9 test puzzle (easier to solve)
       puzzle = [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        [1, 0, 0, 4, 0, 0, 7, 0, 0],
+        [0, 2, 0, 0, 5, 0, 0, 8, 0],
+        [0, 0, 3, 0, 0, 6, 0, 0, 9],
+        [4, 0, 0, 7, 0, 0, 1, 0, 0],
+        [0, 5, 0, 0, 8, 0, 0, 2, 0],
+        [0, 0, 6, 0, 0, 9, 0, 0, 3],
+        [7, 0, 0, 1, 0, 0, 4, 0, 0],
+        [0, 8, 0, 0, 2, 0, 0, 5, 0],
+        [0, 0, 9, 0, 0, 3, 0, 0, 6]
       ];
     }
     
@@ -204,44 +229,114 @@ function App() {
     return true;
   }, [isValidMove, shuffleArray]);
 
-  const solveSudoku = useCallback((grid) => {
+  const findBestCell = useCallback((grid) => {
     const size = grid.length;
-    
-    // Find next empty cell
+    let bestCell = null;
+    let minPossibilities = size + 1;
+
     for (let row = 0; row < size; row++) {
       for (let col = 0; col < size; col++) {
         if (grid[row][col] === 0) {
-          // Try each number from 1 to size
+          let possibilities = 0;
           for (let num = 1; num <= size; num++) {
             if (isValidMove(grid, row, col, num)) {
-              grid[row][col] = num;
-              
-              // Recursively solve the rest
-              if (solveSudoku(grid)) {
-                return true;
-              }
-              
-              // Backtrack
-              grid[row][col] = 0;
+              possibilities++;
             }
           }
-          // If no number works, return false
-          return false;
+          if (possibilities < minPossibilities) {
+            minPossibilities = possibilities;
+            bestCell = { row, col, possibilities };
+            if (possibilities === 0) {
+              return bestCell; // No possibilities, early exit
+            }
+          }
         }
       }
     }
-    // If no empty cells found, puzzle is solved
+    return bestCell;
+  }, [isValidMove]);
+
+  const solveSudoku = useCallback((grid) => {
+    const size = grid.length;
+    let attempts = 0;
+    const maxAttempts = size * size * size; // Reasonable limit to prevent infinite loops
+    
+    const solveRecursive = (grid) => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        console.log('Max attempts reached, stopping solver');
+        return false;
+      }
+      
+      // Find the best empty cell (with least possibilities)
+      const bestCell = findBestCell(grid);
+      if (!bestCell) {
+        return true; // No empty cells, puzzle solved
+      }
+      
+      if (bestCell.possibilities === 0) {
+        return false; // No valid moves possible
+      }
+      
+      const { row, col } = bestCell;
+      
+      // Try each number from 1 to size
+      for (let num = 1; num <= size; num++) {
+        if (isValidMove(grid, row, col, num)) {
+          grid[row][col] = num;
+          
+          // Recursively solve the rest
+          if (solveRecursive(grid)) {
+            return true;
+          }
+          
+          // Backtrack
+          grid[row][col] = 0;
+        }
+      }
+      return false;
+    };
+    
+    const result = solveRecursive(grid);
+    console.log(`Solver completed with ${attempts} attempts`);
+    return result;
+  }, [isValidMove, findBestCell]);
+
+  const isValidGrid = useCallback((grid) => {
+    const size = grid.length;
+    
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        const num = grid[row][col];
+        if (num !== 0) {
+          // Temporarily remove the number to check if placement is valid
+          const tempGrid = grid.map(r => [...r]);
+          tempGrid[row][col] = 0;
+          if (!isValidMove(tempGrid, row, col, num)) {
+            console.log(`Invalid number ${num} at position (${row}, ${col})`);
+            return false;
+          }
+        }
+      }
+    }
     return true;
   }, [isValidMove]);
 
   const handleSolve = useCallback(() => {
     const gridCopy = sudokuGrid.map(row => [...row]);
     
-    // Debug info for 6x6
+    // Debug info for different grid sizes
     if (gridSize === 6) {
       console.log('6x6 Grid being solved:', gridCopy);
       const { rows, cols } = getBoxDimensions(6);
       console.log('Box dimensions for 6x6:', { rows, cols });
+    } else if (gridSize === 9) {
+      console.log('9x9 Grid being solved:', gridCopy);
+      console.log('Checking initial grid validity...');
+      if (!isValidGrid(gridCopy)) {
+        alert('The puzzle has invalid entries! Please check for conflicts.');
+        return;
+      }
     }
     
     let solved;
@@ -267,7 +362,7 @@ function App() {
     } else {
       alert('No solution exists for this puzzle!');
     }
-  }, [sudokuGrid, solveSudoku, isGridEmpty, generateRandomSolution, gridSize, getBoxDimensions]);
+  }, [sudokuGrid, solveSudoku, isGridEmpty, generateRandomSolution, gridSize, getBoxDimensions, isValidGrid]);
 
   return (
     <AppContainer>

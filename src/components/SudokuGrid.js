@@ -10,15 +10,25 @@ const GridContainer = styled.div`
   padding: 10px;
   margin: 0 auto;
   grid-template-columns: ${props => `repeat(${props.gridSize}, 1fr)`};
-  max-width: 500px;
+  max-width: min(500px, 90vw);
   aspect-ratio: 1;
+  
+  @media (max-width: 480px) {
+    max-width: 95vw;
+    padding: 8px;
+    gap: 1px;
+  }
 `;
 
 const Cell = styled.input`
   width: 100%;
   height: 100%;
   text-align: center;
-  font-size: ${props => props.gridSize <= 4 ? '24px' : props.gridSize <= 6 ? '20px' : '16px'};
+  font-size: ${props => 
+    props.gridSize <= 4 ? 'clamp(16px, 4vw, 24px)' : 
+    props.gridSize <= 6 ? 'clamp(14px, 3.5vw, 20px)' : 
+    'clamp(12px, 3vw, 16px)'
+  };
   font-weight: bold;
   border: 1px solid #bdc3c7;
   border-radius: 4px;
@@ -30,6 +40,9 @@ const Cell = styled.input`
   outline: none;
   aspect-ratio: 1;
   cursor: pointer;
+  
+  /* Better touch targets for mobile */
+  min-height: ${props => props.gridSize <= 4 ? '50px' : props.gridSize <= 6 ? '40px' : '35px'};
   
   &:focus {
     border-color: #3498db;
@@ -46,6 +59,15 @@ const Cell = styled.input`
   &:invalid {
     border-color: #e74c3c;
     background: #fdf2f2;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: ${props => 
+      props.gridSize <= 4 ? '18px' : 
+      props.gridSize <= 6 ? '16px' : 
+      '14px'
+    };
+    min-height: ${props => props.gridSize <= 4 ? '45px' : props.gridSize <= 6 ? '38px' : '32px'};
   }
 `;
 
