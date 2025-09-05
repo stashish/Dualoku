@@ -63,7 +63,7 @@ const ClearButton = styled(ActionButton)`
   }
 `;
 
-const SolverButton = ({ onSolve, onClear, onGenerateTest }) => {
+const SolverButton = ({ onSolve, onClear, onGenerateTest, onToggleImageUploader, showImageUploader }) => {
   return (
     <ButtonContainer>
       <SolveButton onClick={onSolve}>
@@ -81,6 +81,19 @@ const SolverButton = ({ onSolve, onClear, onGenerateTest }) => {
           }}
         >
           🎲 Sample Puzzle
+        </ActionButton>
+      )}
+      {onToggleImageUploader && (
+        <ActionButton 
+          onClick={onToggleImageUploader}
+          style={{
+            background: showImageUploader 
+              ? 'linear-gradient(135deg, #e74c3c, #c0392b)'
+              : 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+            color: 'white'
+          }}
+        >
+          {showImageUploader ? '❌ Hide Scanner' : '📸 Scan Image'}
         </ActionButton>
       )}
     </ButtonContainer>
