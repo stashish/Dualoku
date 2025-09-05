@@ -181,7 +181,7 @@ const SudokuGrid = ({
         row.map((cell, colIndex) => (
           <Cell
             key={`${rowIndex}-${colIndex}`}
-            type="text"
+            type="number"
             value={cell === 0 ? '' : cell}
             onChange={(e) => handleInputChange(rowIndex, colIndex, e)}
             onClick={() => handleCellClick(rowIndex, colIndex)}
