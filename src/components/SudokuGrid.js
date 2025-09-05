@@ -51,9 +51,6 @@ const Cell = styled.input`
   /* Better touch targets for mobile */
   min-height: ${props => props.gridSize <= 4 ? '50px' : props.gridSize <= 6 ? '40px' : '35px'};
   
-  /* Better touch targets for mobile */
-  min-height: ${props => props.gridSize <= 4 ? '50px' : props.gridSize <= 6 ? '40px' : '35px'};
-  
   &:focus {
     border-color: #3498db;
     box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);

@@ -11,19 +11,12 @@ import './App.css';
 const AppContainer = styled.div`
   min-height: 100vh;
   min-height: 100dvh; /* Use dynamic viewport height for mobile */
-  min-height: 100dvh; /* Use dynamic viewport height for mobile */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
-  @media (max-width: 768px) {
-    padding: 10px;
-    min-height: 100vh;
-  }
   
   @media (max-width: 768px) {
     padding: 10px;
@@ -35,14 +28,8 @@ const Title = styled.h1`
   color: white;
   font-size: clamp(2rem, 8vw, 3rem);
   margin-bottom: 20px;
-  font-size: clamp(2rem, 8vw, 3rem);
-  margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   text-align: center;
-  
-  @media (max-width: 480px) {
-    margin-bottom: 15px;
-  }
   
   @media (max-width: 480px) {
     margin-bottom: 15px;
@@ -67,16 +54,6 @@ const GameContainer = styled.div`
     padding: 15px;
     border-radius: 15px;
   }
-  
-  @media (max-width: 768px) {
-    padding: 20px;
-    margin: 0 10px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 15px;
-    border-radius: 15px;
-  }
 `;
 
 const ControlsContainer = styled.div`
@@ -85,11 +62,6 @@ const ControlsContainer = styled.div`
   gap: 20px;
   margin-bottom: 30px;
   align-items: center;
-  
-  @media (max-width: 768px) {
-    gap: 15px;
-    margin-bottom: 20px;
-  }
   
   @media (max-width: 768px) {
     gap: 15px;
@@ -192,17 +164,7 @@ function App() {
       ];
     } else {
       // Very simple 9x9 test puzzle (easier to solve)
-      // Very simple 9x9 test puzzle (easier to solve)
       puzzle = [
-        [1, 0, 0, 4, 0, 0, 7, 0, 0],
-        [0, 2, 0, 0, 5, 0, 0, 8, 0],
-        [0, 0, 3, 0, 0, 6, 0, 0, 9],
-        [4, 0, 0, 7, 0, 0, 1, 0, 0],
-        [0, 5, 0, 0, 8, 0, 0, 2, 0],
-        [0, 0, 6, 0, 0, 9, 0, 0, 3],
-        [7, 0, 0, 1, 0, 0, 4, 0, 0],
-        [0, 8, 0, 0, 2, 0, 0, 5, 0],
-        [0, 0, 9, 0, 0, 3, 0, 0, 6]
         [1, 0, 0, 4, 0, 0, 7, 0, 0],
         [0, 2, 0, 0, 5, 0, 0, 8, 0],
         [0, 0, 3, 0, 0, 6, 0, 0, 9],
@@ -339,96 +301,13 @@ function App() {
   }, [isValidMove, shuffleArray]);
 
   const findBestCell = useCallback((grid) => {
-  const findBestCell = useCallback((grid) => {
     const size = grid.length;
-    let bestCell = null;
-    let minPossibilities = size + 1;
-
     let bestCell = null;
     let minPossibilities = size + 1;
 
     for (let row = 0; row < size; row++) {
       for (let col = 0; col < size; col++) {
         if (grid[row][col] === 0) {
-          let possibilities = 0;
-          for (let num = 1; num <= size; num++) {
-            if (isValidMove(grid, row, col, num)) {
-              possibilities++;
-            }
-          }
-          if (possibilities < minPossibilities) {
-            minPossibilities = possibilities;
-            bestCell = { row, col, possibilities };
-            if (possibilities === 0) {
-              return bestCell; // No possibilities, early exit
-            }
-          }
-        }
-      }
-    }
-    return bestCell;
-  }, [isValidMove]);
-
-  const solveSudoku = useCallback((grid) => {
-    const size = grid.length;
-    let attempts = 0;
-    const maxAttempts = size * size * size; // Reasonable limit to prevent infinite loops
-    
-    const solveRecursive = (grid) => {
-      attempts++;
-      if (attempts > maxAttempts) {
-        console.log('Max attempts reached, stopping solver');
-        return false;
-      }
-      
-      // Find the best empty cell (with least possibilities)
-      const bestCell = findBestCell(grid);
-      if (!bestCell) {
-        return true; // No empty cells, puzzle solved
-      }
-      
-      if (bestCell.possibilities === 0) {
-        return false; // No valid moves possible
-      }
-      
-      const { row, col } = bestCell;
-      
-      // Try each number from 1 to size
-      for (let num = 1; num <= size; num++) {
-        if (isValidMove(grid, row, col, num)) {
-          grid[row][col] = num;
-          
-          // Recursively solve the rest
-          if (solveRecursive(grid)) {
-            return true;
-          }
-          
-          // Backtrack
-          grid[row][col] = 0;
-        }
-      }
-      return false;
-    };
-    
-    const result = solveRecursive(grid);
-    console.log(`Solver completed with ${attempts} attempts`);
-    return result;
-  }, [isValidMove, findBestCell]);
-
-  const isValidGrid = useCallback((grid) => {
-    const size = grid.length;
-    
-    for (let row = 0; row < size; row++) {
-      for (let col = 0; col < size; col++) {
-        const num = grid[row][col];
-        if (num !== 0) {
-          // Temporarily remove the number to check if placement is valid
-          const tempGrid = grid.map(r => [...r]);
-          tempGrid[row][col] = 0;
-          if (!isValidMove(tempGrid, row, col, num)) {
-            console.log(`Invalid number ${num} at position (${row}, ${col})`);
-            return false;
-          }
           let possibilities = 0;
           for (let num = 1; num <= size; num++) {
             if (isValidMove(grid, row, col, num)) {
@@ -518,18 +397,10 @@ function App() {
     const gridCopy = sudokuGrid.map(row => [...row]);
     
     // Debug info for different grid sizes
-    // Debug info for different grid sizes
     if (gridSize === 6) {
       console.log('6x6 Grid being solved:', gridCopy);
       const { rows, cols } = getBoxDimensions(6);
       console.log('Box dimensions for 6x6:', { rows, cols });
-    } else if (gridSize === 9) {
-      console.log('9x9 Grid being solved:', gridCopy);
-      console.log('Checking initial grid validity...');
-      if (!isValidGrid(gridCopy)) {
-        alert('The puzzle has invalid entries! Please check for conflicts.');
-        return;
-      }
     } else if (gridSize === 9) {
       console.log('9x9 Grid being solved:', gridCopy);
       console.log('Checking initial grid validity...');
